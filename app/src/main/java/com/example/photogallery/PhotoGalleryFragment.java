@@ -51,10 +51,9 @@ public class PhotoGalleryFragment extends Fragment {
          * 前面说过, Handler 默认与当前线程的 Looper 相关联。这个 Handler 是在 onCreate(...) 方
          * 法中创建的,所以它会与主线程的 Looper 相关联。
          */
+
         Handler handler = new Handler();
-        /**
-         *
-         */
+//        Log.i(TAG, "onCreate: handler  "+handler);
         mThumbnailDownloader = new ThumbnailDownloader<>(handler);
         /**
          * standard callback interface ,newbee!!!

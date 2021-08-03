@@ -39,7 +39,8 @@ public class ThumbnailDownloader<T> extends HandlerThread {
 
     public ThumbnailDownloader(Handler mResponseHandler) {
         super(TAG);
-        this.mRequestHandler = mResponseHandler;
+        this.mResponseHandler = mResponseHandler;
+        Log.i(TAG, "ThumbnailDownloader: construct mRequestHandler  "+this.mResponseHandler);
     }
 
     @Override
