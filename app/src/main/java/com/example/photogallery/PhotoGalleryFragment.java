@@ -194,6 +194,7 @@ public class PhotoGalleryFragment extends Fragment {
             GalleryItem galleryItem = galleryItems.get(position);
             Drawable drawable = getResources().getDrawable(R.drawable.bill_up_close);
             holder.bindDrawable(drawable);
+
             mThumbnailDownloader.queueThumbnail(holder, galleryItem.getmUrl());
 //            holder.bindGalleryItem(galleryItem);
 

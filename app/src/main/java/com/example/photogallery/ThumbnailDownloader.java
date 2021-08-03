@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
+ * todo
  * @param <T> 注意, ThumbnailDownloader 类使用了 <T> 泛型参数。 ThumbnailDownloader 类的使用者(这
  *            里指 PhotoGalleryFragment), 需要使用某些对象来识别每次下载,并确定该使用已下载图片
  *            更新哪个UI元素。有了泛型参数,实施起来方便了很多。
