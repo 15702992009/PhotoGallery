@@ -21,7 +21,7 @@ public class FlickrFetchr {
 
     List<GalleryItem> fetchItems() {
         Log.i(TAG, "fetchItems: execute");
-        List<GalleryItem> items = new ArrayList<>();
+        List<GalleryItem> items = new ArrayList<>(5);
         try {
             String url = Uri.parse("https://api.flickr.com/services/rest/")
                     .buildUpon()
