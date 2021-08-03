@@ -1,12 +1,17 @@
 package com.example.photogallery;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -34,6 +39,7 @@ public class PhotoGalleryFragment extends Fragment {
     private List<GalleryItem> mItem = new ArrayList<>();
 
     ViewAdapter viewAdapter;
+    ThumbnailDownloader<ViewAdapter.ViewHolder> mThumbnailDownloader;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,6 +47,41 @@ public class PhotoGalleryFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         new FetchItemsTask().execute();
+        /**
+         * 前面说过, Handler 默认与当前线程的 Looper 相关联。这个 Handler 是在 onCreate(...) 方
+         * 法中创建的,所以它会与主线程的 Looper 相关联。
+         */
+        Handler handler = new Handler();
+        /**
+         *
+         */
+        mThumbnailDownloader = new ThumbnailDownloader<>(handler);
+        /**
+         * standard callback interface ,newbee!!!
+         */
+        mThumbnailDownloader.setmThumbnailDownloadListener(new ThumbnailDownloader.ThumbnailDownloadListener<ViewAdapter.ViewHolder>() {
+            @Override
+            public void onThumbnailDownloaded(ViewAdapter.ViewHolder viewHolder, Bitmap bitmap) {
+                Drawable drawable= new BitmapDrawable(getResources(),bitmap);
+                viewHolder.bindDrawable(drawable);
+            }
+        });
+        mThumbnailDownloader.start();
+        mThumbnailDownloader.getLooper();
+        Log.i(TAG, "Background thread started");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mThumbnailDownloader.quit();
+        Log.i(TAG, "onDestroy: Background thread destroyed");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mThumbnailDownloader.clearQueue();
     }
 
     @Nullable
@@ -101,7 +142,7 @@ public class PhotoGalleryFragment extends Fragment {
             Log.i(TAG, "onPostExecute: " + items.size());
             PhotoGalleryFragment.this.mItem = items;
 //            viewAdapter = new ViewAdapter(PhotoGalleryFragment.this.mItem);
-            viewAdapter.galleryItems=items;
+            viewAdapter.galleryItems = items;
             recyclerView.setAdapter(viewAdapter);
             recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
 
@@ -118,16 +159,21 @@ public class PhotoGalleryFragment extends Fragment {
 
         class ViewHolder extends RecyclerView.ViewHolder {
 
-            private TextView mTitleTextView;
+            //            private TextView mTitleTextView;
+            private ImageView mImageView;
+
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
-                mTitleTextView = (TextView) itemView.findViewById(R.id.item_text);
+                mImageView = (ImageView) itemView.findViewById(R.id.item_image);
             }
 
-            public void bindGalleryItem(GalleryItem item) {
-                Log.i(TAG, "bindGalleryItem: execute" + item.toString());
-                mTitleTextView.setText(item.toString());
+            /*            public void bindGalleryItem(GalleryItem item) {
+                            Log.i(TAG, "bindGalleryItem: execute" + item.toString());
+                            mTitleTextView.setText(item.toString());
+                        }*/
+            public void bindDrawable(Drawable drawable) {
+                mImageView.setImageDrawable(drawable);
             }
         }
 
@@ -147,7 +193,11 @@ public class PhotoGalleryFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             GalleryItem galleryItem = galleryItems.get(position);
-            holder.bindGalleryItem(galleryItem);
+            Drawable drawable = getResources().getDrawable(R.drawable.bill_up_close);
+            holder.bindDrawable(drawable);
+            mThumbnailDownloader.queueThumbnail(holder, galleryItem.getmUrl());
+//            holder.bindGalleryItem(galleryItem);
+
         }
 
         @Override
