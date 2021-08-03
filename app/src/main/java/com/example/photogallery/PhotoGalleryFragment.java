@@ -10,9 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,11 +32,9 @@ import java.util.List;
  */
 public class PhotoGalleryFragment extends Fragment {
     private static final String TAG = "PhotoGalleryFragment";
-    private RecyclerView recyclerView;
-
+    private RecyclerView mRecyclerView;
     private List<GalleryItem> mItem = new ArrayList<>();
-
-    ViewAdapter viewAdapter;
+    ViewAdapter mViewAdapter;
     ThumbnailDownloader<ViewAdapter.ViewHolder> mThumbnailDownloader;
 
     @Override
@@ -58,10 +54,10 @@ public class PhotoGalleryFragment extends Fragment {
         /**
          * standard callback interface ,newbee!!!
          */
-        mThumbnailDownloader.setmThumbnailDownloadListener(new ThumbnailDownloader.ThumbnailDownloadListener<ViewAdapter.ViewHolder>() {
+        mThumbnailDownloader.setThumbnailDownloadListener(new ThumbnailDownloader.ThumbnailDownloadListener<ViewAdapter.ViewHolder>() {
             @Override
             public void onThumbnailDownloaded(ViewAdapter.ViewHolder viewHolder, Bitmap bitmap) {
-                Drawable drawable= new BitmapDrawable(getResources(),bitmap);
+                Drawable drawable = new BitmapDrawable(getResources(), bitmap);
                 viewHolder.bindDrawable(drawable);
             }
         });
@@ -89,22 +85,14 @@ public class PhotoGalleryFragment extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
 
         View view = inflater.inflate(R.layout.photo_recycler, container, false);
-        recyclerView = view.findViewById(R.id.recycler_id);
-        viewAdapter = new ViewAdapter(mItem);
-        recyclerView.setAdapter(viewAdapter);
-        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+        mRecyclerView = view.findViewById(R.id.recycler_id);
+        //set cache for recyclerView
+        mRecyclerView.setItemViewCacheSize(100);
+        mViewAdapter = new ViewAdapter(mItem);
+        mRecyclerView.setAdapter(mViewAdapter);
+        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
         return view;
     }
-
-
-
-/*
-    void dataChangedNotify() {
-        Log.i(TAG, "dataChangedNotify: execute" + viewAdapter);
-        viewAdapter.notifyDataSetChanged();
-    }
-*/
-
 
     /**
      * order to execute task asynchronously
@@ -141,9 +129,9 @@ public class PhotoGalleryFragment extends Fragment {
             Log.i(TAG, "onPostExecute: " + items.size());
             PhotoGalleryFragment.this.mItem = items;
 //            viewAdapter = new ViewAdapter(PhotoGalleryFragment.this.mItem);
-            viewAdapter.galleryItems = items;
-            recyclerView.setAdapter(viewAdapter);
-            recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+            mViewAdapter.mGalleryItems = items;
+            mRecyclerView.setAdapter(mViewAdapter);
+            mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
 
         }
     }
@@ -154,7 +142,7 @@ public class PhotoGalleryFragment extends Fragment {
      */
     private class ViewAdapter extends RecyclerView.Adapter<ViewAdapter.ViewHolder> {
         private static final String TAG = "ViewAdapter";
-        private List<GalleryItem> galleryItems;
+        private List<GalleryItem> mGalleryItems;
 
         class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -178,7 +166,7 @@ public class PhotoGalleryFragment extends Fragment {
 
         public ViewAdapter(List<GalleryItem> galleryItems) {
             Log.i(TAG, "ViewAdapter: galleryItems" + galleryItems.size());
-            this.galleryItems = galleryItems;
+            this.mGalleryItems = galleryItems;
         }
 
         @NonNull
@@ -191,18 +179,18 @@ public class PhotoGalleryFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            GalleryItem galleryItem = galleryItems.get(position);
+            GalleryItem galleryItem = mGalleryItems.get(position);
             Drawable drawable = getResources().getDrawable(R.drawable.bill_up_close);
             holder.bindDrawable(drawable);
 
-            mThumbnailDownloader.queueThumbnail(holder, galleryItem.getmUrl());
+            mThumbnailDownloader.queueThumbnail(holder, galleryItem.getUrl());
 //            holder.bindGalleryItem(galleryItem);
 
         }
 
         @Override
         public int getItemCount() {
-            return galleryItems.size();
+            return mGalleryItems.size();
         }
     }
 }

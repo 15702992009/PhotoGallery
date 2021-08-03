@@ -49,12 +49,12 @@ public class FlickrFetchr {
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject photoJsonObject = jsonArray.getJSONObject(i);
             GalleryItem galleryItem = new GalleryItem();
-            galleryItem.setmId(photoJsonObject.getString("id"));
-            galleryItem.setmCaption(photoJsonObject.getString("title"));
+            galleryItem.setId(photoJsonObject.getString("id"));
+            galleryItem.setCaption(photoJsonObject.getString("title"));
             if (!photoJsonObject.has("url_s")) {
                 continue;
             }
-            galleryItem.setmUrl(photoJsonObject.getString("url_s"));
+            galleryItem.setUrl(photoJsonObject.getString("url_s"));
             items.add(galleryItem);
         }
 

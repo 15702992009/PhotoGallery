@@ -13,6 +13,30 @@ public class GalleryItem {
                 '}';
     }
 
+    public String getCaption() {
+        return mCaption;
+    }
+
+    public void setCaption(String caption) {
+        mCaption = caption;
+    }
+
+    public String getId() {
+        return mId;
+    }
+
+    public void setId(String id) {
+        mId = id;
+    }
+
+    public String getUrl() {
+        return mUrl;
+    }
+
+    public void setUrl(String url) {
+        mUrl = url;
+    }
+
     public GalleryItem() {
     }
 
@@ -22,28 +46,4 @@ public class GalleryItem {
         this.mUrl = mUrl;
     }
 
-    public String getmCaption() {
-
-        return mCaption;
-    }
-
-    public void setmCaption(String mCaption) {
-        this.mCaption = mCaption;
-    }
-
-    public String getmId() {
-        return mId;
-    }
-
-    public void setmId(String mId) {
-        this.mId = mId;
-    }
-
-    public String getmUrl() {
-        return mUrl;
-    }
-
-    public void setmUrl(String mUrl) {
-        this.mUrl = mUrl;
-    }
 }

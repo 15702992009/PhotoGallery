@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * todo
+ *
  * @param <T> 注意, ThumbnailDownloader 类使用了 <T> 泛型参数。 ThumbnailDownloader 类的使用者(这
  *            里指 PhotoGalleryFragment), 需要使用某些对象来识别每次下载,并确定该使用已下载图片
  *            更新哪个UI元素。有了泛型参数,实施起来方便了很多。
@@ -26,14 +27,16 @@ public class ThumbnailDownloader<T> extends HandlerThread {
     private static final int MESSAGE_DOWNLOAD = 0;
     private Handler mRequestHandler;
     private Handler mResponseHandler;
-    private ThumbnailDownloadListener<T> mThumbnailDownloadListener;;
+    private ThumbnailDownloadListener<T> mThumbnailDownloadListener;
+    ;
 
-    public void setmThumbnailDownloadListener(ThumbnailDownloadListener<T> mThumbnailDownloadListener) {
-        this.mThumbnailDownloadListener = mThumbnailDownloadListener;
+
+    public void setThumbnailDownloadListener(ThumbnailDownloadListener<T> thumbnailDownloadListener) {
+        mThumbnailDownloadListener = thumbnailDownloadListener;
     }
 
     public interface ThumbnailDownloadListener<T> {
-        void onThumbnailDownloaded(T target,Bitmap thumbnail);
+        void onThumbnailDownloaded(T target, Bitmap thumbnail);
     }
 
     private ConcurrentMap<T, String> mRequestMap = new ConcurrentHashMap<>();
@@ -41,7 +44,7 @@ public class ThumbnailDownloader<T> extends HandlerThread {
     public ThumbnailDownloader(Handler mResponseHandler) {
         super(TAG);
         this.mResponseHandler = mResponseHandler;
-        Log.i(TAG, "ThumbnailDownloader: construct mRequestHandler  "+this.mResponseHandler);
+        Log.i(TAG, "ThumbnailDownloader: construct mRequestHandler  " + this.mResponseHandler);
     }
 
     @Override
@@ -107,11 +110,11 @@ public class ThumbnailDownloader<T> extends HandlerThread {
             mResponseHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (!Objects.equals(mRequestMap.get(target), url) ||mHasQuit){
+                    if (!Objects.equals(mRequestMap.get(target), url) || mHasQuit) {
                         return;
                     }
                     mRequestMap.remove(target);
-                    mThumbnailDownloadListener.onThumbnailDownloaded(target,bitmap);
+                    mThumbnailDownloadListener.onThumbnailDownloaded(target, bitmap);
                 }
             });
 
@@ -120,6 +123,7 @@ public class ThumbnailDownloader<T> extends HandlerThread {
         }
 
     }
+
     public void clearQueue() {
         mRequestHandler.removeMessages(MESSAGE_DOWNLOAD);
         mRequestMap.clear();
