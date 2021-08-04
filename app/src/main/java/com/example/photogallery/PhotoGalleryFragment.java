@@ -1,5 +1,7 @@
 package com.example.photogallery;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -8,12 +10,17 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,7 +49,9 @@ public class PhotoGalleryFragment extends Fragment {
         Log.i(TAG, "onCreate: execute");
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        new FetchItemsTask().execute();
+        setHasOptionsMenu(true);
+//        new FetchItemsTask().execute();
+        updateItems();
         /**
          * 前面说过, Handler 默认与当前线程的 Looper 相关联。这个 Handler 是在 onCreate(...) 方
          * 法中创建的,所以它会与主线程的 Looper 相关联。
@@ -103,6 +112,11 @@ public class PhotoGalleryFragment extends Fragment {
      * 重要工作能完成,那最好考虑其他解决方案,比如使用 Service (详见第28章)。
      */
     private class FetchItemsTask extends AsyncTask<Void, Integer, List<GalleryItem>> {
+        private String mQuery;
+
+        public FetchItemsTask(String query) {
+            mQuery = query;
+        }
 
         /**
          * 我们让 doInBackground(...) 方法返回了 GalleryItem 对象 List 。这样既修正了代
@@ -113,8 +127,13 @@ public class PhotoGalleryFragment extends Fragment {
          */
         @Override
         protected List<GalleryItem> doInBackground(Void... params) {
-            Log.i(TAG, "doInBackground:");
-            return new FlickrFetchr().fetchItems();
+//            return new FlickrFetchr().fetchItems();
+//            String query = "robot";
+            if (mQuery == null) {
+                return new FlickrFetchr().fetchRecentPhotos();
+            } else {
+                return new FlickrFetchr().searchPhotos(mQuery);
+            }
         }
 
         /**
@@ -191,6 +210,66 @@ public class PhotoGalleryFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mGalleryItems.size();
+        }
+    }
+
+    /**
+     * 响应用户搜索
+     * 用户提交查询后,应用立即开始搜索Flickr网站,然后刷新显示搜索结果。查阅开发文档可
+     * 知, SearchView.OnQueryTextListener 接口已提供了接收回调的方式,可以响应查询指令。
+     * 更新 onCreateOptionsMenu(...) 方法,添加一个 SearchView.OnQueryTextListener 监
+     * 听方法,如代码清单27-9所示。
+     *
+     * @param menu
+     * @param inflater
+     */
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_photo_gallery, menu);
+        MenuItem searchItem = menu.findItem(R.id.menu_item_search);
+        final SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Log.d(TAG, "onQueryTextSubmit: " + query);
+                QueryPreferences.setPrefSearchQuery(getActivity(), query);
+                InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), 0);
+
+                updateItems();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                Log.d(TAG, "onQueryTextChange: " + newText);
+                return false;
+            }
+        });
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String query = QueryPreferences.getStoredQuery(getActivity());
+                searchView.setQuery(query, false);
+            }
+        });
+    }
+
+    private void updateItems() {
+        String query = QueryPreferences.getStoredQuery(getActivity());
+        new FetchItemsTask(query).execute();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_clear:
+                QueryPreferences.setPrefSearchQuery(getActivity(), null);
+                updateItems();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }

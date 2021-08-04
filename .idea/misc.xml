@@ -12,10 +12,11 @@
         <entry key="app/src/main/res/layout/list_item_gallery.xml" value="0.3015625" />
         <entry key="app/src/main/res/layout/photo_recycler.xml" value="0.1831306990881459" />
         <entry key="app/src/main/res/layout/text12.xml" value="0.3759057971014493" />
+        <entry key="app/src/main/res/menu/fragment_photo_gallery.xml" value="0.3765625" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">
